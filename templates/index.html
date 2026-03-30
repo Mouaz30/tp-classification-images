@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Chat ou Chien ?</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .zone {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="file"] {
+            margin: 20px 0;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #preview {
+            max-width: 300px;
+            margin: 20px auto;
+            border-radius: 10px;
+            display: none;
+        }
+
+        #resultat {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="zone">
+        <h1>🐱 Chat ou Chien ? 🐶</h1>
+        <p>Charge une photo et le modèle va prédire !</p>
+        <input type="file" id="imageInput" accept="image/*">
+        <br>
+        <img id="preview" src="" alt="Aperçu">
+        <br>
+        <button onclick="predire()">Analyser l'image</button>
+        <div id="resultat"></div>
+    </div>
+
+    <script>
+        document.getElementById('imageInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const preview = document.getElementById('preview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        });
+
+        async function predire() {
+            const fileInput = document.getElementById('imageInput');
+            const resultat = document.getElementById('resultat');
+
+            if (!fileInput.files[0]) {
+                resultat.innerHTML = "⚠️ Choisis une image d'abord !";
+                return;
+            }
+
+            resultat.innerHTML = "⏳ Analyse en cours...";
+
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+            resultat.innerHTML = data.result;
+        }
+    </script>
+</body>
+
+</html>
